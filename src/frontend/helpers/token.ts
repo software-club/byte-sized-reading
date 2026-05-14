@@ -14,3 +14,12 @@ export const clearTokens = async () => {
   await secureStorage.deleteItemAsync("accessToken");
   await secureStorage.deleteItemAsync("refreshToken");
 };
+
+export const getTokens = async (): Promise<{
+  accessToken: string | null;
+  refreshToken: string | null;
+}> => {
+  const accessToken = await secureStorage.getItemAsync("accessToken");
+  const refreshToken = await secureStorage.getItemAsync("refreshToken");
+  return { accessToken, refreshToken };
+};

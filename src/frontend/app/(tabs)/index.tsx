@@ -2,9 +2,22 @@ import { StyleSheet } from "react-native";
 
 import EditScreenInfo from "@/components/EditScreenInfo";
 import { Text, View } from "@/components/Themed";
+import { getTokens } from "@/helpers/token";
+import { useEffect, useState } from "react";
 
 export default function TabOneScreen() {
-  // const navigation = useNavigation();
+  const [tokens, setTokens] = useState<{
+    accessToken: string | null;
+    refreshToken: string | null;
+  } | null>(null);
+
+  useEffect(() => {
+    const fetchTokens = async () => {
+      const storedTokens = await getTokens();
+      setTokens(storedTokens);
+    };
+    fetchTokens();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -12,7 +25,8 @@ export default function TabOneScreen() {
         style={styles.title}
         // onPress={() => navigation.navigate("/auth/login")}
       >
-        Tab One
+        {tokens?.accessToken}
+        {tokens?.refreshToken}
       </Text>
       <View
         style={styles.separator}
