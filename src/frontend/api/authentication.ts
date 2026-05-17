@@ -5,6 +5,14 @@ export type LoginResponse = {
   refreshToken: string;
 };
 
+export const register = async (
+  email: string,
+  password: string,
+): Promise<LoginResponse> => {
+  const response = await instance.post("/register", { email, password });
+  return response.data as LoginResponse;
+};
+
 export const login = async (
   username: string,
   password: string,
