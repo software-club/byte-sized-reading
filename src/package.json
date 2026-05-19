@@ -1,0 +1,20 @@
+{
+  "name": "byte-sized-reading",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/software-club/byte-sized-reading#readme",
+  "bugs": {
+    "url": "https://github.com/software-club/byte-sized-reading/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/software-club/byte-sized-reading.git"
+  },
+  "license": "ISC",
+  "author": "Software Club",
+  "scripts": {
+    "start": "npx concurrently \"npm run start:frontend\" \"npm run start:backend\"",
+    "start:frontend": "cd frontend && npm run start",
+    "start:backend": "cd backend && python manage.py runserver"
+  }
+}

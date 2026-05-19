@@ -18,9 +18,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as Yup from "yup";
 
 const loginSchema = Yup.object().shape({
-  email: Yup.string()
-    .email("Invalid email address")
-    .required("Email is required"),
+  username: Yup.string()
+    .required("Username is required"),
   password: Yup.string().required("Password is required"),
 });
 
@@ -53,14 +52,14 @@ export default function LoginScreen() {
           </View>
 
           <Formik
-            initialValues={{ email: "", password: "" }}
+            initialValues={{ username: "", password: "" }}
             validationSchema={loginSchema}
             onSubmit={async (values, { setSubmitting, setFieldError }) => {
               try {
-                const response = await login(values.email, values.password);
+                const response = await login(values.username, values.password);
                 await signIn(response.accessToken, response.refreshToken);
               } catch {
-                setFieldError("password", "Invalid email or password");
+                setFieldError("password", "Invalid username or password");
               } finally {
                 setSubmitting(false);
               }
@@ -78,16 +77,15 @@ export default function LoginScreen() {
               <View style={styles.form}>
                 <View style={styles.field}>
                   <Input
-                    placeholder="Email"
-                    keyboardType="email-address"
+                    placeholder="Username"
                     autoCapitalize="none"
                     autoCorrect={false}
-                    value={values.email}
-                    onChangeText={handleChange("email")}
-                    onBlur={handleBlur("email")}
+                    value={values.username}
+                    onChangeText={handleChange("username")}
+                    onBlur={handleBlur("username")}
                   />
-                  {touched.email && errors.email && (
-                    <ErrorText>{errors.email}</ErrorText>
+                  {touched.username && errors.username && (
+                    <ErrorText>{errors.username}</ErrorText>
                   )}
                 </View>
 

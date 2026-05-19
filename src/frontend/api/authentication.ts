@@ -10,20 +10,26 @@ export const register = async (
   password: string,
 ): Promise<LoginResponse> => {
   const response = await instance.post("/register", { email, password });
-  return response.data as LoginResponse;
+
+  return {
+    accessToken: response.data.access,
+    refreshToken: response.data.refresh
+  } ;
 };
 
 export const login = async (
   username: string,
   password: string,
 ): Promise<LoginResponse> => {
-  return { accessToken: "dummyAccessToken", refreshToken: "dummyRefreshToken" };
-  // try {
-  //   const response = await instance.post("/login", { username, password });
-  //   return response.data as LoginResponse;
-  // } catch (error) {
-  //   throw error;
-  // }
+  try {
+    const response = await instance.post("/login", { username, password });
+    return {
+    accessToken: response.data.access,
+    refreshToken: response.data.refresh
+  } ;
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const refreshToken = async (
@@ -31,7 +37,10 @@ export const refreshToken = async (
 ): Promise<LoginResponse> => {
   try {
     const response = await instance.post("/refresh", { refreshToken });
-    return response.data as LoginResponse;
+    return {
+    accessToken: response.data.access,
+    refreshToken: response.data.refresh
+  } ;
   } catch (error) {
     throw error;
   }
