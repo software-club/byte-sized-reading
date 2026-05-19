@@ -48,7 +48,7 @@ function RootLayoutNav() {
 
     if (!isAuthenticated) {
       router.replace("/(unauth)/login");
-    } else if (isAuthenticated) {
+    } else {
       router.replace("/(auth)/dashboard");
     }
   }, [isAuthenticated, isLoading]);
