@@ -122,11 +122,17 @@ STATIC_URL = 'static/'
 
 # REST FRAMEWORK -- When you use APIView or any other DRF views, the browsable API is automatically enabled for your development environment.
 
+
+
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     ],
+     'DEFAULT_AUTHENTICATION_CLASSES': (
+     
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
 }
 
 
