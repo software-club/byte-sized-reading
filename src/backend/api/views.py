@@ -15,7 +15,8 @@ class BooksView(APIView):
 
     def post(self, request):
         serializer = BookSerializer(data=request.data)
-
+        
+        
         logger.info("Request to create a book with => %s", serializer.initial_data)
 
         if serializer.is_valid():
