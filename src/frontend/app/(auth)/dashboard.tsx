@@ -1,27 +1,31 @@
 import { StyleSheet } from "react-native";
+import { useState } from "react";
 
 import { Button } from "@/components/Button";
 import { Text } from "@/components/Themed";
 import { View } from "@/components/View";
+import { UploadModal } from "@/components/UploadModal";
 import { useAuth } from "@/context/AuthContext";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { getDocumentAsync } from "expo-document-picker";
+import { getDocumentAsync, DocumentPickerAsset } from "expo-document-picker";
 
 export default function TabOneScreen() {
   const { signOut } = useAuth();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [pickedAsset, setPickedAsset] = useState<DocumentPickerAsset | null>(
+    null
+  );
 
   const uploadFile = async () => {
-    const file = await getDocumentAsync({
+    const result = await getDocumentAsync({
       type: "application/pdf",
     });
 
-    if (!file.canceled && file.assets) {
-      const pdfFile = file.assets[0].file;
+    if (!result.canceled && result.assets) {
+      const asset = result.assets[0];
+      setPickedAsset(asset);
+      setModalVisible(true);
     }
-
-    // ensure the file is pdf
-
-    // make a post request to the BE with file
   };
 
   return (
@@ -37,6 +41,15 @@ export default function TabOneScreen() {
         <Button onPress={() => uploadFile()}>Upload File</Button>
         <Text> Start uploading your files for Byte sized reading </Text>
       </View>
+
+      <UploadModal
+        visible={modalVisible}
+        asset={pickedAsset}
+        onClose={() => setModalVisible(false)}
+        onSuccess={() => {
+          // TODO: refresh books list if needed
+        }}
+      />
     </SafeAreaView>
   );
 }
