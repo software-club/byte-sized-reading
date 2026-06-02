@@ -9,7 +9,7 @@ import { UploadModal } from "@/components/UploadModal";
 import { useAuth } from "@/context/AuthContext";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getDocumentAsync, DocumentPickerAsset } from "expo-document-picker";
-import { getBooks, Book } from "@/api/books";
+import { getBooks, Book, getFullDocumentUrl } from "@/api/books";
 import { useThemeColor } from "@/components/Themed";
 
 export default function DashboardScreen() {
@@ -35,54 +35,30 @@ export default function DashboardScreen() {
     }
   };
 
-  const surfaceColor = useThemeColor(
-    { light: "#f5f5f5", dark: "#1a1a1a" },
-    "surface",
-  );
-  const borderColor = useThemeColor(
-    { light: "#e0e0e0", dark: "#333333" },
-    "border",
-  );
-  const mutedColor = useThemeColor(
-    { light: "#666666", dark: "#999999" },
-    "muted",
-  );
+  const surfaceColor = useThemeColor({}, "surface");
+  const borderColor = useThemeColor({}, "border");
+  const mutedColor = useThemeColor({}, "muted");
+
+  const fetchBooks = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getBooks();
+      setBooks(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load books");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await getBooks();
-        setBooks(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load books");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchBooks();
   }, []);
 
   const filteredBooks = books.filter((book) =>
     book.name.toLowerCase().includes(query.toLowerCase()),
   );
-
-  const formatFileSize = (bytes?: number) => {
-    if (!bytes) return "";
-    const kb = bytes / 1024;
-    if (kb < 1024) return `${kb.toFixed(1)} KB`;
-    return `${(kb / 1024).toFixed(1)} MB`;
-  };
-
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString();
-    } catch {
-      return dateString;
-    }
-  };
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -132,12 +108,15 @@ export default function DashboardScreen() {
                 </Text>
               )}
               <View style={styles.bookMetaRow}>
-                <Text style={[styles.bookMeta, { color: mutedColor }]}>
-                  {formatDate(item.createdAt)}
-                </Text>
-                {item.fileSize && (
+                {item.doc && (
                   <Text style={[styles.bookMeta, { color: mutedColor }]}>
-                    {formatFileSize(item.fileSize)}
+                    <a
+                      href={getFullDocumentUrl(item.doc)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      View
+                    </a>
                   </Text>
                 )}
               </View>
@@ -157,7 +136,7 @@ export default function DashboardScreen() {
         asset={pickedAsset}
         onClose={() => setModalVisible(false)}
         onSuccess={() => {
-          // TODO: refresh books list if needed
+          fetchBooks();
         }}
       />
     </SafeAreaView>

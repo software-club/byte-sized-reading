@@ -1,11 +1,11 @@
 import { getTokens } from "@/helpers/token";
-import { instance } from "./axiosInstance";
+import { baseURL, instance } from "./axiosInstance";
 
 export type Book = {
   id: string;
   name: string;
   author?: string;
-  fileSize?: number;
+  doc?: string;
   createdAt: string;
 };
 
@@ -23,4 +23,8 @@ export const getBooks = async (): Promise<Book[]> => {
   });
 
   return response.data;
+};
+
+export const getFullDocumentUrl = (path: string): string => {
+  return baseURL + path;
 };
