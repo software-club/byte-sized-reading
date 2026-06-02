@@ -3,8 +3,21 @@ from rest_framework.response import Response
 from .models import Book
 from .serializers import BookSerializer
 from admin.logger import logger
+from structlog.contextvars import bind_contextvars, clear_contextvars
 
-class BooksView(APIView):
+class BaseAPIView(APIView):
+    def initial(self, request, *args, **kwargs):
+        clear_contextvars()
+
+        super().initial(request, *args, **kwargs)
+
+        if request.user and request.user.is_authenticated:
+            bind_contextvars(
+                user_id=request.user.id,
+                username=request.user.username,
+            )
+
+class BooksView(BaseAPIView):
     def get(self, request):
         books = Book.objects.all()
         serializer = BookSerializer(books, many=True)

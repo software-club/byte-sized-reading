@@ -176,17 +176,21 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "json_formatter",
         },
-        #"structured_json_file": {
-            #"class": "logging.handlers.WatchedFileHandler",
-            #"filename": "logs/json.log",
-         #   "formatter": "json_formatter",
-        #},
+        "structured_json_file": {
+            "class": "logging.handlers.WatchedFileHandler",
+            "filename": "logs/json.log",
+           "formatter": "json_formatter",
+        },
     },
     "loggers": {
         "api": {
             "handlers": ["console"],
             "level": "INFO",
         },
+        "admin": {
+            "handlers": ["console"],
+            "level": "INFO",
+        }
     }
 }
 
