@@ -5,7 +5,8 @@ import { instance } from "./axiosInstance";
 export const uploadFile = async (
   name: string,
   author: string,
-  asset: DocumentPickerAsset
+  description: string,
+  asset: DocumentPickerAsset,
 ): Promise<void> => {
   const { accessToken } = await getTokens();
 
@@ -16,11 +17,8 @@ export const uploadFile = async (
   const form = new FormData();
   form.append("name", name);
   form.append("author", author);
-  form.append("file", {
-    uri: asset.uri,
-    name: asset.name,
-    type: asset.mimeType ?? "application/pdf",
-  } as any);
+  form.append("description", description);
+  form.append("doc", asset.file as any);
 
   await instance.post("/books", form, {
     headers: {

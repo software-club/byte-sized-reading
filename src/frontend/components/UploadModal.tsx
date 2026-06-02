@@ -18,6 +18,7 @@ import * as Yup from "yup";
 const uploadSchema = Yup.object().shape({
   title: Yup.string().required("Title is required"),
   author: Yup.string().required("Author is required"),
+  description: Yup.string().required("Description is required"),
 });
 
 interface UploadModalProps {
@@ -63,11 +64,11 @@ export function UploadModal({
             </Text>
 
             <Formik
-              initialValues={{ title: "", author: "" }}
+              initialValues={{ title: "", author: "", description: "" }}
               validationSchema={uploadSchema}
               onSubmit={async (values, { setSubmitting, setFieldError }) => {
                 try {
-                  await uploadFile(values.title, values.author, asset);
+                  await uploadFile(values.title, values.author, values.description, asset);
                   onSuccess?.();
                   onClose();
                 } catch (error) {
@@ -115,6 +116,21 @@ export function UploadModal({
                     />
                     {touched.author && errors.author && (
                       <ErrorText>{errors.author}</ErrorText>
+                    )}
+                  </View>
+
+                  <View style={styles.field}>
+                    <Input
+                      placeholder="Description"
+                      value={values.description}
+                      onChangeText={handleChange("description")}
+                      onBlur={handleBlur("description")}
+                      editable={!isSubmitting}
+                      multiline
+                      numberOfLines={4}
+                    />
+                    {touched.description && errors.description && (
+                      <ErrorText>{errors.description}</ErrorText>
                     )}
                   </View>
 
