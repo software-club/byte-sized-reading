@@ -15,6 +15,10 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+MEDIA_URL = '/media/'
+
+# Specify the directory where media files are stored
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -175,7 +179,7 @@ LOGGING = {
         "structured_json_file": {
             "class": "logging.handlers.WatchedFileHandler",
             "filename": "logs/json.log",
-            "formatter": "json_formatter",
+           "formatter": "json_formatter",
         },
     },
     "loggers": {
@@ -183,6 +187,10 @@ LOGGING = {
             "handlers": ["console"],
             "level": "INFO",
         },
+        "admin": {
+            "handlers": ["console"],
+            "level": "INFO",
+        }
     }
 }
 

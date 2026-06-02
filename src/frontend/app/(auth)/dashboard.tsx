@@ -5,30 +5,47 @@ import { Button } from "@/components/Button";
 import { Text } from "@/components/Themed";
 import { View } from "@/components/View";
 import { Input } from "@/components/Input";
+import { UploadModal } from "@/components/UploadModal";
 import { useAuth } from "@/context/AuthContext";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { getDocumentAsync } from "expo-document-picker";
+import { getDocumentAsync, DocumentPickerAsset } from "expo-document-picker";
 import { getBooks, Book } from "@/api/books";
 import { useThemeColor } from "@/components/Themed";
 
 export default function DashboardScreen() {
   const { signOut } = useAuth();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [pickedAsset, setPickedAsset] = useState<DocumentPickerAsset | null>(
+    null,
+  );
   const [books, setBooks] = useState<Book[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const uploadFile = async () => {
+    const result = await getDocumentAsync({
+      type: "application/pdf",
+    });
+
+    if (!result.canceled && result.assets) {
+      const asset = result.assets[0];
+      setPickedAsset(asset);
+      setModalVisible(true);
+    }
+  };
+
   const surfaceColor = useThemeColor(
     { light: "#f5f5f5", dark: "#1a1a1a" },
-    "surface"
+    "surface",
   );
   const borderColor = useThemeColor(
     { light: "#e0e0e0", dark: "#333333" },
-    "border"
+    "border",
   );
   const mutedColor = useThemeColor(
     { light: "#666666", dark: "#999999" },
-    "muted"
+    "muted",
   );
 
   useEffect(() => {
@@ -49,18 +66,8 @@ export default function DashboardScreen() {
   }, []);
 
   const filteredBooks = books.filter((book) =>
-    book.name.toLowerCase().includes(query.toLowerCase())
+    book.name.toLowerCase().includes(query.toLowerCase()),
   );
-
-  const uploadFile = async () => {
-    const file = await getDocumentAsync({
-      type: "application/pdf",
-    });
-
-    if (!file.canceled && file.assets) {
-      // TODO: upload file to backend
-    }
-  };
 
   const formatFileSize = (bytes?: number) => {
     if (!bytes) return "";
@@ -102,7 +109,9 @@ export default function DashboardScreen() {
       ) : filteredBooks.length === 0 ? (
         <View style={styles.centerContent}>
           <Text style={{ color: mutedColor }}>
-            {books.length === 0 ? "No books yet. Upload one!" : "No books match your search."}
+            {books.length === 0
+              ? "No books yet. Upload one!"
+              : "No books match your search."}
           </Text>
         </View>
       ) : (
@@ -139,12 +148,18 @@ export default function DashboardScreen() {
         />
       )}
 
-      <Button
-        onPress={() => uploadFile()}
-        style={styles.uploadButton}
-      >
+      <Button onPress={() => uploadFile()} style={styles.uploadButton}>
         Upload File
       </Button>
+
+      <UploadModal
+        visible={modalVisible}
+        asset={pickedAsset}
+        onClose={() => setModalVisible(false)}
+        onSuccess={() => {
+          // TODO: refresh books list if needed
+        }}
+      />
     </SafeAreaView>
   );
 }
