@@ -1,0 +1,22 @@
+// Project-local debug tasks
+//
+// For more documentation on how to configure debug tasks,
+// see: https://zed.dev/docs/debugger
+[
+  {
+    "label": "Run Django server",
+    "adapter": "Debugpy",
+    "request": "launch",
+    "program": "src/backend/manage.py",
+    "args": ["runserver"],
+    "django": true,
+  },
+  {
+    "label": "Run Test",
+    "adapter": "Debugpy",
+    "request": "launch",
+    "program": "src/backend/manage.py",
+    "args": ["test", "api.tests", "-v", "2"],
+    "django": true,
+  },
+]
