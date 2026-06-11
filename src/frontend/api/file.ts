@@ -8,12 +8,6 @@ export const uploadFile = async (
   description: string,
   asset: DocumentPickerAsset,
 ): Promise<void> => {
-  const { accessToken } = await getTokens();
-
-  if (!accessToken) {
-    throw new Error("No access token found");
-  }
-
   const form = new FormData();
   form.append("name", name);
   form.append("author", author);
@@ -23,7 +17,6 @@ export const uploadFile = async (
   await instance.post("/books", form, {
     headers: {
       "Content-Type": "multipart/form-data",
-      Authorization: `Bearer ${accessToken}`,
     },
   });
 };

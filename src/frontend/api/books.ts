@@ -10,17 +10,7 @@ export type Book = {
 };
 
 export const getBooks = async (): Promise<Book[]> => {
-  const { accessToken } = await getTokens();
-
-  if (!accessToken) {
-    throw new Error("No access token found");
-  }
-
-  const response = await instance.get<Book[]>("/books", {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
+  const response = await instance.get<Book[]>("/books");
 
   return response.data;
 };
