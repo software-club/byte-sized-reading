@@ -1,9 +1,11 @@
-from rest_framework.views import APIView
+from admin.logger import logger
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from structlog.contextvars import bind_contextvars, clear_contextvars
+
 from .models import Book, ScheduledJobs
 from .serializers import BookSerializer, ScheduleJobSerializer
-from admin.logger import logger
-from structlog.contextvars import bind_contextvars, clear_contextvars
+
 
 class BaseAPIView(APIView):
     def initial(self, request, *args, **kwargs):
@@ -16,13 +18,18 @@ class BaseAPIView(APIView):
                 user_id=request.user.id,
                 username=request.user.username,
             )
+
+
 class ScheduleJobView(BaseAPIView):
     def post(self, request, book_id):
+        logger.info("Scheduled job Request=> %s", request.data)
         serializer = ScheduleJobSerializer(data=request.data)
-        logger.info("Scheduled job => %s", serializer.initial_data)
-        serializer.initial_data['book_id'] = book_id
-        serializer.initial_data['user_id'] = request.user.id
-        serializer.initial_data['frequency'] = ','.join(map(str, (request.data['frequency'])))    
+        logger.info("Serializsed Scheduled job => %s", serializer.initial_data)
+        serializer.initial_data["book_id"] = book_id
+        serializer.initial_data["user_id"] = request.user.id
+        serializer.initial_data["frequency"] = ",".join(
+            map(str, (request.data["frequency"]))
+        )
         if serializer.is_valid():
             logger.info("Creating schedule for: %s", serializer.validated_data)
             serializer.save()
@@ -30,23 +37,25 @@ class ScheduleJobView(BaseAPIView):
         return Response(serializer.errors, status=400)
 
     def get(self, request, book_id):
-        scheduled_jobs = ScheduledJobs.objects.all()
-        serializer = ScheduleJobSerializer(scheduled_jobs, many=True)
+        scheduled_jobs = ScheduledJobs.objects.filter(
+            book_id=Book.objects.get(id=book_id)
+        ).last()
+        serializer = ScheduleJobSerializer(scheduled_jobs)
         return Response(serializer.data)
-            
+
+
 class BooksView(BaseAPIView):
     def get(self, request):
         books = Book.objects.all()
         serializer = BookSerializer(books, many=True)
 
-        logger.info("Getting books => %s", serializer.data)
+        logger.info("Getting %d books", len(serializer.data))
 
         return Response(serializer.data)
 
     def post(self, request):
         serializer = BookSerializer(data=request.data)
-        
-        
+
         logger.info("Request to create a book with => %s", serializer.initial_data)
 
         if serializer.is_valid():
@@ -56,4 +65,3 @@ class BooksView(BaseAPIView):
             return Response(serializer.data, status=201)
         logger.info("Error when creating book as => %s", serializer.errors)
         return Response(serializer.errors, status=400)
-

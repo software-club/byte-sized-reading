@@ -1,5 +1,5 @@
 import axios from "axios";
-import { instance } from "./axiosInstance";
+import { apiBaseURL, baseURL, instance } from "./axiosInstance";
 
 export type LoginResponse = {
   accessToken: string;
@@ -37,7 +37,9 @@ export const refreshAccessToken = async (
   refreshToken: string,
 ): Promise<LoginResponse> => {
   try {
-    const response = await axios.post("/token/refresh", { refreshToken });
+    const response = await axios.post(`${apiBaseURL}/token/refresh`, {
+      refreshToken,
+    });
     return {
       accessToken: response.data.access,
       refreshToken: response.data.refresh,

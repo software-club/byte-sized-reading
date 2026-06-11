@@ -3,7 +3,7 @@ import axios from "axios";
 import { refreshAccessToken } from "./authentication";
 
 export const baseURL = "http://localhost:8000";
-const apiBaseURL = `${baseURL}/api`;
+export const apiBaseURL = `${baseURL}/api`;
 
 export const instance = axios.create({ baseURL: apiBaseURL });
 

@@ -15,6 +15,26 @@ export const getBooks = async (): Promise<Book[]> => {
   return response.data;
 };
 
+export const getBookSchedule = async (input: { book_id: string }) => {
+  const response = await instance.get<any>(`/books/${input.book_id}/schedule`);
+
+  return response.data;
+};
+
+export const handleScheduleBook = async (input: {
+  book_id: string;
+  time: string;
+  timezone: string;
+  frequency: string;
+}) => {
+  const response = await instance.post<any>(
+    `/books/${input.book_id}/schedule`,
+    { ...input, frequency: input.frequency.split(",").map(Number) },
+  );
+
+  return response.data;
+};
+
 export const getFullDocumentUrl = (path: string): string => {
   return baseURL + path;
 };
