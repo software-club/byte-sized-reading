@@ -1,5 +1,11 @@
 import { clearTokens, getTokens, storeTokens } from "@/helpers/token";
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 type AuthContextType = {
   isAuthenticated: boolean;
@@ -36,7 +42,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isLoading, signIn, signOut }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, isLoading, signIn, signOut }}
+    >
       {children}
     </AuthContext.Provider>
   );
