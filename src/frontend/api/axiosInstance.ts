@@ -25,15 +25,15 @@ instance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     if (error.response.status === 401 && !originalRequest._retry) {
+      const { refreshToken } = await getTokens();
+
+      if (!refreshToken) {
+        Promise.reject(error);
+        return;
+      }
+
       originalRequest._retry = true; // Mark the request as retried to avoid infinite loops.
       try {
-        const { refreshToken } = await getTokens();
-
-        if (!refreshToken) {
-          Promise.reject(error);
-          return;
-        }
-        // Make a request to your auth server to refresh the token.
         const response = await refreshAccessToken(refreshToken);
 
         const { accessToken, refreshToken: newRefreshToken } = response;
