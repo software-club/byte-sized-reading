@@ -3,3 +3,4 @@
 - investigate a way to have only the owning user access the file
 - get metadata about the file
 add SendAt
+Write implementation docs

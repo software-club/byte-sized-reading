@@ -1,10 +1,30 @@
+from datetime import datetime
+
 from admin.logger import logger
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from structlog.contextvars import bind_contextvars, clear_contextvars
 
 from .models import Book, ScheduledJobs
-from .serializers import BookSerializer, ScheduleJobSerializer
+from .serializers import BookSerializer, ScheduleJobSerializer, NotifyJobSerializer
+
+from .next_occurrence import next_occurrence
+
+def notify(jobs):
+    for job in jobs:
+        """
+        - get book info
+        - get user email
+        - send notification to email
+        - change job status to scheduled
+        - update send at
+        """
+        logger.info(f"Notifying {job.user_id} at {datetime.now()}. should have been notified at {job.sendAt}",
+                    user_id=job.user_id, job_id=job.id)
+        job.status = 'SCHEDULED'
+        job.sendAt = next_occurrence(job.time, job.timezone, job.frequency)
+        job.save()
+        logger.info(f"Calculated sendAt to {job.sendAt}",user_id=job.user_id, job_id=job.id)
 
 
 class BaseAPIView(APIView):
@@ -44,6 +64,25 @@ class ScheduleJobView(BaseAPIView):
         return Response(serializer.data)
 
 
+
+
+class  NotifyJobView(BaseAPIView):
+
+    def get(self, request):
+        scheduled_jobs = ScheduledJobs.objects.filter(
+            status='SCHEDULED'
+           # sendAt__lte=datetime.now()
+        )
+        for job in scheduled_jobs:
+            job.status = 'SENDING'
+            job.save()
+        notify(scheduled_jobs)
+        serializer =  NotifyJobSerializer(scheduled_jobs, many=True)
+        return Response(serializer.data)
+    def post(self, request):
+        pass
+
+    
 class BooksView(BaseAPIView):
     def get(self, request):
         books = Book.objects.all()

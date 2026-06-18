@@ -21,7 +21,12 @@ class ScheduleJobSerializer(serializers.ModelSerializer):
 
         return super().create(validated_data)
 
+class NotifyJobSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ScheduledJobs
+        fields = '__all__'
 
+    
 class BookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
