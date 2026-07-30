@@ -1,5 +1,4 @@
 import { DocumentPickerAsset } from "expo-document-picker";
-import { getTokens } from "@/helpers/token";
 import { instance } from "./axiosInstance";
 
 export const uploadFile = async (

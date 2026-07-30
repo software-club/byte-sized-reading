@@ -1,30 +1,12 @@
-from datetime import datetime
-
 from admin.logger import logger
+from django.shortcuts import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from structlog.contextvars import bind_contextvars, clear_contextvars
 
 from .models import Book, ScheduledJobs
-from .serializers import BookSerializer, ScheduleJobSerializer, NotifyJobSerializer
-
-from .next_occurrence import next_occurrence
-
-def notify(jobs):
-    for job in jobs:
-        """
-        - get book info
-        - get user email
-        - send notification to email
-        - change job status to scheduled
-        - update send at
-        """
-        logger.info(f"Notifying {job.user_id} at {datetime.now()}. should have been notified at {job.sendAt}",
-                    user_id=job.user_id, job_id=job.id)
-        job.status = 'SCHEDULED'
-        job.sendAt = next_occurrence(job.time, job.timezone, job.frequency)
-        job.save()
-        logger.info(f"Calculated sendAt to {job.sendAt}",user_id=job.user_id, job_id=job.id)
+from .serializers import BookSerializer, ScheduleJobSerializer
 
 
 class BaseAPIView(APIView):
@@ -41,48 +23,32 @@ class BaseAPIView(APIView):
 
 
 class ScheduleJobView(BaseAPIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, book_id):
-        logger.info("Scheduled job Request=> %s", request.data)
+        book = get_object_or_404(Book, id=book_id)
         serializer = ScheduleJobSerializer(data=request.data)
-        logger.info("Serializsed Scheduled job => %s", serializer.initial_data)
-        serializer.initial_data["book_id"] = book_id
-        serializer.initial_data["user_id"] = request.user.id
-        serializer.initial_data["frequency"] = ",".join(
-            map(str, (request.data["frequency"]))
-        )
+
         if serializer.is_valid():
             logger.info("Creating schedule for: %s", serializer.validated_data)
-            serializer.save()
+            serializer.save(book_id=book, user_id=request.user.id)
             return Response(serializer.data, status=201)
+
+        logger.info("Error when creating schedule as => %s", serializer.errors)
         return Response(serializer.errors, status=400)
 
     def get(self, request, book_id):
-        scheduled_jobs = ScheduledJobs.objects.filter(
-            book_id=Book.objects.get(id=book_id)
+        book = get_object_or_404(Book, id=book_id)
+        schedule = ScheduledJobs.objects.filter(
+            book_id=book, user_id=request.user.id
         ).last()
-        serializer = ScheduleJobSerializer(scheduled_jobs)
-        return Response(serializer.data)
+
+        if schedule is None:
+            return Response({"detail": "No schedule for this book."}, status=404)
+
+        return Response(ScheduleJobSerializer(schedule).data)
 
 
-
-
-class  NotifyJobView(BaseAPIView):
-
-    def get(self, request):
-        scheduled_jobs = ScheduledJobs.objects.filter(
-            status='SCHEDULED'
-           # sendAt__lte=datetime.now()
-        )
-        for job in scheduled_jobs:
-            job.status = 'SENDING'
-            job.save()
-        notify(scheduled_jobs)
-        serializer =  NotifyJobSerializer(scheduled_jobs, many=True)
-        return Response(serializer.data)
-    def post(self, request):
-        pass
-
-    
 class BooksView(BaseAPIView):
     def get(self, request):
         books = Book.objects.all()
