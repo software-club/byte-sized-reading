@@ -1,5 +1,5 @@
 import axios from "axios";
-import { apiBaseURL, baseURL, instance } from "./axiosInstance";
+import { apiBaseURL, instance } from "./axiosInstance";
 
 export type LoginResponse = {
   accessToken: string;
