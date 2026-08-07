@@ -1,0 +1,9 @@
+- include uploader id
+- each user should have their own media storage end point
+- investigate a way to have only the owning user access the file
+- get metadata about the file
+- write implementation docs
+- deliver the notifications themselves: look up the book and the user's email,
+  send the reminder, then roll sendAt forward to the next occurrence
+- drive that from a trigger only the scheduler can reach (management command run
+  by cron, or an authenticated endpoint), filtering on sendAt <= now

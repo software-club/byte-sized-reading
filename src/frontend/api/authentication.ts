@@ -1,4 +1,5 @@
-import { instance } from "./axiosInstance";
+import axios from "axios";
+import { apiBaseURL, instance } from "./axiosInstance";
 
 export type LoginResponse = {
   accessToken: string;
@@ -13,8 +14,8 @@ export const register = async (
 
   return {
     accessToken: response.data.access,
-    refreshToken: response.data.refresh
-  } ;
+    refreshToken: response.data.refresh,
+  };
 };
 
 export const login = async (
@@ -24,23 +25,25 @@ export const login = async (
   try {
     const response = await instance.post("/login", { username, password });
     return {
-    accessToken: response.data.access,
-    refreshToken: response.data.refresh
-  } ;
+      accessToken: response.data.access,
+      refreshToken: response.data.refresh,
+    };
   } catch (error) {
     throw error;
   }
 };
 
-export const refreshToken = async (
+export const refreshAccessToken = async (
   refreshToken: string,
 ): Promise<LoginResponse> => {
   try {
-    const response = await instance.post("/refresh", { refreshToken });
+    const response = await axios.post(`${apiBaseURL}/token/refresh`, {
+      refreshToken,
+    });
     return {
-    accessToken: response.data.access,
-    refreshToken: response.data.refresh
-  } ;
+      accessToken: response.data.access,
+      refreshToken: response.data.refresh,
+    };
   } catch (error) {
     throw error;
   }

@@ -1,4 +1,9 @@
-import { StyleSheet, FlatList, ActivityIndicator } from "react-native";
+import {
+  StyleSheet,
+  FlatList,
+  ActivityIndicator,
+  Pressable,
+} from "react-native";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/Button";
@@ -11,10 +16,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { getDocumentAsync, DocumentPickerAsset } from "expo-document-picker";
 import { getBooks, Book, getFullDocumentUrl } from "@/api/books";
 import { useThemeColor } from "@/components/Themed";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { ScheduleModal } from "@/components/ScheduleModal";
 
 export default function DashboardScreen() {
   const { signOut } = useAuth();
   const [modalVisible, setModalVisible] = useState(false);
+  const [scheduleModalVisible, setScheduleModalVisible] = useState(false);
+  const [pickedItem, setPickedItem] = useState<Book | null>(null);
   const [pickedAsset, setPickedAsset] = useState<DocumentPickerAsset | null>(
     null,
   );
@@ -38,6 +47,7 @@ export default function DashboardScreen() {
   const surfaceColor = useThemeColor({}, "surface");
   const borderColor = useThemeColor({}, "border");
   const mutedColor = useThemeColor({}, "muted");
+  const accentColor = useThemeColor({}, "accent");
 
   const fetchBooks = async () => {
     try {
@@ -50,6 +60,11 @@ export default function DashboardScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSchedulePress = (item: Book) => {
+    setScheduleModalVisible(true);
+    setPickedItem(item);
   };
 
   useEffect(() => {
@@ -101,7 +116,17 @@ export default function DashboardScreen() {
                 { backgroundColor: surfaceColor, borderColor },
               ]}
             >
-              <Text style={styles.bookName}>{item.name}</Text>
+              <View style={styles.bookHeader}>
+                <Text style={styles.bookName}>{item.name}</Text>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Schedule ${item.name}`}
+                  onPress={() => handleSchedulePress(item)}
+                  hitSlop={8}
+                >
+                  <FontAwesome name="calendar" size={16} color={accentColor} />
+                </Pressable>
+              </View>
               {item.author && (
                 <Text style={[styles.bookMeta, { color: mutedColor }]}>
                   {item.author}
@@ -137,6 +162,19 @@ export default function DashboardScreen() {
         onClose={() => setModalVisible(false)}
         onSuccess={() => {
           fetchBooks();
+        }}
+      />
+
+      <ScheduleModal
+        visible={scheduleModalVisible}
+        item={pickedItem}
+        onClose={() => {
+          setScheduleModalVisible(false);
+          setPickedItem(null);
+        }}
+        onSuccess={() => {
+          fetchBooks();
+          setPickedItem(null);
         }}
       />
     </SafeAreaView>
@@ -182,10 +220,17 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 12,
   },
+  bookHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+  },
   bookName: {
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 4,
+    flexShrink: 1,
   },
   bookMeta: {
     fontSize: 12,
